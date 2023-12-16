@@ -1,0 +1,11 @@
+
+body{
+  background-image: url("/images/unsplash32.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+
+}
+#space{
+  height: 10vh;
+}

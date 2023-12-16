@@ -1,0 +1,147 @@
+
+/*
+  group
+*/
+/* body {
+    background-image: url("/images/unsplash3.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+} */
+li{
+    font-family: 'Alkatra', cursive;
+    border: 2px solid yellow;
+    border-radius: 10px;
+    text-align: center;
+    /* margin-left: 1rem; */
+    font-size: large;
+    background-color: #d4eb0c;
+    
+}
+li:hover{
+    cursor: pointer;
+    background-color: rgb(196, 196, 7);
+}
+#space {
+    height: 3vh;
+}
+#heading{
+    font-family: 'Merriweather Sans', sans-serif;
+    color: orange;
+    background: #571616;
+
+}
+.scroll-div-list-of-users{
+    /* height: 30vh;
+    width:20vw; */
+    height: 10rem;
+    width:20rem;
+    overflow: hidden;
+    overflow-y:scroll;
+    border: 3px solid gray;
+}
+#card{
+    background-color: #c4b6b6;
+}
+.grp{
+    background-color: #e75858;
+    text-shadow: #571616;
+    border: 1px solid rgb(184, 236, 186);
+    border-radius:10px ;
+}
+
+
+
+
+
+
+/*
+  chat
+*/
+body{
+    background-image: url("/images/unsplash19.jpg");
+     background-size: cover;
+   background-repeat: no-repeat; 
+  background-attachment: fixed;
+  }  
+  #chatTextArea {
+    border-radius: 20px;
+    height:3rem;
+    width:20rem;
+  }
+
+  #input {
+    margin-top: 7vh;
+  }
+
+  #box {
+    height: 70vh;
+  }
+  .scroll{
+    height: 10rem;
+    width: 20rem;
+    overflow: hidden;
+    overflow-y: scroll;
+    border: 2px solid black;
+    border-radius: 10px;
+
+
+  }
+
+  .scroll-div {
+    background-image: url("/images/unsplash30.jpg");
+    background-size: cover;
+    /* height: 30vh;
+    width: 35rem; */
+    overflow: hidden;
+    overflow-y: scroll;
+    border: 3px solid gray;
+    border-radius: 15px;
+  
+  }
+
+  #Chatheading {
+    font-family: 'Merriweather Sans', sans-serif;
+    color: orange;
+    background: #571616;
+  }
+
+  #chatbox{
+    font-family: 'Merriweather Sans', sans-serif;
+    color: rgb(230, 188, 146);
+    background: #01061859;
+    border-radius: 10px;
+
+
+  }
+  #row{
+    border-radius: 14px;
+  }
+
+
+
+  .message{
+    background-color: rgb(211, 195, 195);
+    width:30%;
+    padding:10px;
+    margin: 5px 5px;
+    border:4px solid purple;
+    border-radius: 10px;
+
+  }
+  .left{
+    float: left;
+    clear:both;
+
+  }
+  .right{
+    float: right;
+    clear:both;
+
+  }
+  .members{
+    background-color: rgb(225, 176, 231);
+    border: 3px solid rgb(165, 219, 16);
+    border-radius: 10px;
+  }

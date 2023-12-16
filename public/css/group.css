@@ -1,0 +1,48 @@
+body {
+    background-image: url("/images/unsplash20.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+}
+li{
+    font-family: 'Alkatra', cursive;
+    border: 2px solid yellow;
+    border-radius: 10px;
+    text-align: center;
+    /* margin-left: 1rem; */
+    font-size: large;
+    background-color: #d4eb0c;
+    
+}
+li:hover{
+    cursor: pointer;
+    background-color: rgb(196, 196, 7);
+}
+#space {
+    height: 3vh;
+}
+#heading{
+    font-family: 'Merriweather Sans', sans-serif;
+    color: orange;
+    background: #571616;
+
+}
+.scroll-div{
+    /* height: 30vh;
+    width:20vw; */
+    height: 10rem;
+    width:20rem;
+    overflow: hidden;
+    overflow-y:scroll;
+    border: 3px solid gray;
+}
+#card{
+    background-color: #c4b6b6;
+}
+.grp{
+    background-color: #e75858;
+    text-shadow: #571616;
+    border: 1px solid rgb(184, 236, 186);
+    border-radius:10px ;
+}

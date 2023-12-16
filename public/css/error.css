@@ -1,0 +1,27 @@
+body{
+    background-image: url("/images/unsplash28.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    
+
+}
+h1{
+    text-align: center;
+
+    color: rgb(216, 185, 185);
+
+}
+h5{
+    text-align: center;
+    color: azure;
+    text-decoration: none;
+    margin-left: 350px;
+
+}
+div{
+    /* margin-top: 30vh; */
+    /* width:30vw;
+    height:15vh; */
+    display: inline;
+}
