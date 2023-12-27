@@ -1,6 +1,7 @@
 const path = require('path');
 const bcrypt = require('bcrypt');
 const { Op } = require('sequelize');
+const { UploadFileToS3 } = require("../services/awss3");
 
 //models:
 const User = require('../models/user');
@@ -72,7 +73,7 @@ exports.getMessages=async(req,res,next)=>{
 }
 exports.postMessages=async (req,res,next)=>{
     try{
-        
+        const file = req.file;
         const {message,userId,groupId}=req.body;
         //console.log(req.body,"9999")
         //if group along user exists,he/she may be removed when inside chat box
@@ -82,13 +83,23 @@ exports.postMessages=async (req,res,next)=>{
         }});
 
         if(isIngroup){
-            if(invalidInput(message)){
-                return res.status(404).json({ message: "Post Message: Message field can't be empty!", success: false });
+            // if(invalidInput(message)){
+            //     return res.status(404).json({ message: "Post Message: Message field can't be empty!", success: false });
         
-            }
+            // }
 
+            let fileUrl=""
+            if (file){
+                const currentDate = new Date();
+                const formattedDate = currentDate.toISOString().slice(0, 10); // Format date as YYYY-MM-DD
+                const formattedTime = currentDate.toISOString().slice(11, 19).replace(/:/g, ''); // Format time as HHmmss without colons
+                const filename = `${formattedDate}_${formattedTime}_${file.originalname}`;;
+                const buffer = file.buffer;
+                fileUrl = await UploadFileToS3(filename, buffer);
+            }   
             const saveToDb=await Message.create({
                 message:message,
+                multimedia:fileUrl,
                 senderName:req.user.name,
                 userId:userId,
                 groupId:groupId

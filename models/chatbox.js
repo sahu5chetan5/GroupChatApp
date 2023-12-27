@@ -11,9 +11,11 @@ const Message=sequelize.define('message',{
     senderName:Sequelize.STRING,
     
     message:{
-        type:Sequelize.STRING,
-        allowNull:false,
+        type:Sequelize.STRING
 
+    },
+    multimedia:{
+        type:Sequelize.STRING
     }
   
 

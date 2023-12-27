@@ -11,8 +11,10 @@ const privateMessage=sequelize.define('privatemessage',{
     
     message:{
         type:Sequelize.STRING,
-        allowNull:false,
-
+        
+    },
+    multimedia:{
+        type:Sequelize.STRING
     },
     senderId: { 
         type: Sequelize.INTEGER,

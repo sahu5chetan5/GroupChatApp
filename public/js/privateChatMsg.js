@@ -11,6 +11,8 @@ window.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('box').style.display ='none'
         document.getElementById('chatTextArea').style.display ='none'
         document.getElementById('send').style.display ='none'
+        document.getElementById('fileInput').style.display='none'
+
         //const headingResp = await axios.get(`/private-chat/heading-data/${userId}`, { headers: { "Authorization": token } });
         const UserHeadingResp = await axios.get(`/private-chat/heading-data/${userId}`, { headers: { "Authorization": token } });
         const Name = UserHeadingResp.data.userName.name
@@ -26,6 +28,7 @@ window.addEventListener('DOMContentLoaded', async () => {
            }
             showUsersOnScreen(element);
         })
+        socket.emit('join-room', userId);
     }
     catch(err){
         console.log(err)
@@ -52,6 +55,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('box').style.display ='block'
             document.getElementById('chatTextArea').style.display ='block'
             document.getElementById('send').style.display ='block'
+            document.getElementById('fileInput').style.display='block'
             
             localStorage.setItem('receiverId',id);
             let receiverId = id;
@@ -77,27 +81,41 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('send').onclick = async function (e) {
         e.preventDefault();
+        let fileInput = document.getElementById('fileInput')
+        let fileInputValue = document.getElementById("fileInput").value;
         let receiverId = localStorage.getItem('receiverId');
+        let message= document.getElementById('chatTextArea').value;
         let senderId = userId;
         //console.log(token)
-        console.log(document.getElementById('chatTextArea').value)
-        console.log(receiverId,senderId)
+        
+        if (!(fileInputValue) &&!(message)){
+            document.getElementById('chatTextArea').value="";
+            return
+        }else if ((!fileInputValue)&&(message.trim()===""))
+        {   document.getElementById('chatTextArea').value="";
+            return
+        }
         //console.log(receiverId)
         try {
-            const messageDetails = {
-                
-                message: document.getElementById('chatTextArea').value,
-                senderId: Number(userId),
-                receiverId: Number(receiverId)
-                
+            let formData = new FormData();
+            formData.append('message', message);
+            formData.append('file', fileInput.files[0]);
+            formData.append('senderId', senderId);
+            formData.append('receiverId', receiverId);
 
-            }
-            
-            const postMsgResp = await axios.post(`/private-chat/message`, messageDetails, { headers: { "Authorization": token } });
-            
-            
+            //change back to the original state
             document.getElementById('chatTextArea').value="";
-            console.log(receiverId,senderId,"check")
+            document.getElementById('fileInput').value="";
+            
+            const postMsgResp = await axios.post(`/private-chat/message`, formData, { 
+                headers: { 
+                    'Content-Type': 'multipart/form-data',
+                    "Authorization": token 
+                } });
+            
+            
+            
+            //console.log(receiverId,senderId,"check")
             socket.emit('send-private-message',receiverId,senderId);
 
         //     //socket function:==>
@@ -118,7 +136,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         // console.log('received from back end:-->',data==groupId);
         try{
             //message will be send to the specific gr only:
-            console.log(receiverId,senderId,"check 2")
+            //console.log(receiverId,senderId,"check 2")
             //const newPrivateMessages= await axios.get(`private-chat/new-messages/?groupId=${groupId}&lastMsgId=${lastMsgId}`);
             const newPrivateMessages= await axios.get(`/private-chat/new-messages/${receiverId}/${senderId}`, { headers: { "Authorization": token } })
             // console.log("newmessages---->",newMessages.data);
@@ -142,27 +160,87 @@ window.addEventListener('DOMContentLoaded', async () => {
     
     })
 
-    function displayAllChatMsgs(data){
-        console.log(data.senderId,data.receiverId,data.senderName,data.receiverName,data.message,"111111")
-        const senderId=data.senderId;
+    function displayAllChatMsgs(data) {
+        //console.log(data.senderId, data.receiverId, data.senderName, data.receiverName, data.message, "111111");
+    
+        const senderId = data.senderId;
         const senderName = data.senderName;
-        const receiverId =data.receiverId;
-        const receiverName=data.receiverName;
+        const receiverId = data.receiverId;
+        const receiverName = data.receiverName;
         const message = data.message;
-        let parentNode=document.querySelector('#box');
-        if (senderId==userId){
-            let childNode2=`<div class="right message" id=${senderId}><span class="fw-bold">${senderName}:</span> <span class="fst-italic">${message}</span></div>`;
-                parentNode.innerHTML+=childNode2;
+        const multimedia = data.multimedia;
+    
+        let parentNode = document.querySelector('#box');
+    
+        if (senderId == userId) {
+            // Message container
+            if (message) {
+                const messageContainer = document.createElement('div');
+                messageContainer.classList.add('right', 'message');
+                messageContainer.id = senderId;
+    
+                const messageText = document.createElement('span');
+                messageText.classList.add('fw-bold', 'fst-italic');
+                messageText.textContent = `${senderName}: ${message}`;
+                messageContainer.appendChild(messageText);
+    
+                // Append the message container to the chat container
+                parentNode.appendChild(messageContainer);
+            }
+    
+            // Multimedia container
+            if (multimedia) {
+                const multimediaContainer = document.createElement('div');
+                multimediaContainer.classList.add('right', 'multimedia');
+                multimediaContainer.id = senderId;
+    
+                const multimediaElement = document.createElement('img');
+                multimediaElement.src = multimedia;
+                multimediaElement.alt = 'Multimedia';
+                multimediaElement.style.width = '400px'//'100px'; // Adjust the width as needed
+                multimediaElement.style.height = '400px'//'auto'; //
+                multimediaElement.style.border = '6px solid #800080'
+                multimediaContainer.appendChild(multimediaElement);
+    
+                // Append the multimedia container to the chat container
+                parentNode.appendChild(multimediaContainer);
+            }
+        } else {
+            // Message container
+            if (message) {
+                const messageContainer = document.createElement('div');
+                messageContainer.classList.add('left', 'message');
+                messageContainer.id = senderId;
+    
+                const messageText = document.createElement('span');
+                messageText.classList.add('fw-bold', 'fst-italic');
+                messageText.textContent = `${senderName}: ${message}`;
+                messageContainer.appendChild(messageText);
+    
+                // Append the message container to the chat container
+                parentNode.appendChild(messageContainer);
+            }
+    
+            // Multimedia container
+            if (multimedia) {
+                const multimediaContainer = document.createElement('div');
+                multimediaContainer.classList.add('left', 'multimedia');
+                multimediaContainer.id = senderId;
+    
+                const multimediaElement = document.createElement('img');
+                multimediaElement.src = multimedia;
+                multimediaElement.alt = 'Multimedia';
+                multimediaElement.style.width = '400px'; // Adjust the width as needed
+                multimediaElement.style.height = '400px'; //
+                multimediaElement.style.border = '6px solid #800080'
+                multimediaContainer.appendChild(multimediaElement);
+    
+                // Append the multimedia container to the chat container
+                parentNode.appendChild(multimediaContainer);
+            }
         }
-        else
-        {   let childNode1=`<div class="left message" id=${senderId}><span class="fw-bold">${senderName}:</span> <span class="fst-italic">${data.message}</span></div>`;
-                parentNode.innerHTML+=childNode1;
-
-
-        }
-        
     }
-
+    
     
     
 

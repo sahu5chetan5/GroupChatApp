@@ -26,10 +26,29 @@ const server=require('http').createServer(app);
 const io=require('socket.io')(server);
 
 io.on('connection',socket=>{
-    socket.on('send-private-message',(receiverId,senderId)=>{
-        // console.log("socket::",data);
-        io.emit('receive-private-message',receiverId,senderId);
-    })
+    socket.on('join-room', userId => {
+        socket.join(userId);
+    });
+    socket.on('send-private-message', async (receiverId, senderId) => {
+        try {
+            
+            // Process and save the message if needed
+            
+            // Emit the message to the receiver's room
+            io.to(receiverId).emit('receive-private-message', receiverId, senderId);
+            
+            // Emit the message to the sender's room
+            io.to(senderId).emit('receive-private-message', receiverId, senderId);
+        } catch (err) {
+            console.error(err);
+        }
+    });
+
+
+    // socket.on('send-private-message',(receiverId,senderId)=>{
+    //     // console.log("socket::",data);
+    //     io.emit('receive-private-message',receiverId,senderId);
+    // })
 
     socket.on('send-message',(data)=>{
         // console.log("socket::",data);

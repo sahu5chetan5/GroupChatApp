@@ -1,13 +1,12 @@
 const path = require('path');
-const bcrypt = require('bcrypt');
+//const bcrypt = require('bcrypt');
 const { Op } = require('sequelize');
+const { UploadFileToS3 } = require("../services/awss3");
 
 //models:
 const User = require('../models/user');
-const Message=require('../models/chatbox');
-const Group=require('../models/group');
-const User_Group=require('../models/usergroup')
 const privateMessage =require('../models/privateChatbox')
+
 
 function invalidInput(input) {
     if (input === undefined || input.length === 0) {
@@ -65,15 +64,31 @@ exports.listOfUsers =async(req,res,next)=>{
 
 exports.postPrivateMsg = async(req,res,next)=>{
     try{
+        const file = req.file;
         const {receiverId,senderId,message}=req.body
-        console.log(receiverId,senderId,message)
         const senderRow = await User.findOne({ where: { id: senderId } });
         const receiverRow = await User.findOne({ where: { id: receiverId } });
         const senderName= senderRow.name
         const receiverName= receiverRow.name
         
+
+        
+        
+
+        let fileUrl=""
+        if (file){
+            const currentDate = new Date();
+            const formattedDate = currentDate.toISOString().slice(0, 10); // Format date as YYYY-MM-DD
+            const formattedTime = currentDate.toISOString().slice(11, 19).replace(/:/g, ''); // Format time as HHmmss without colons
+            const filename = `${formattedDate}_${formattedTime}_${file.originalname}`;;
+            const buffer = file.buffer;
+            fileUrl = await UploadFileToS3(filename, buffer);
+        }   
+        console.log(fileUrl,"fileUrl")
         const saveToDb=await privateMessage.create({
+
             message:message,
+            multimedia:fileUrl,
             senderId:senderId,
             senderName:senderName,
             receiverId: receiverId,
@@ -84,6 +99,7 @@ exports.postPrivateMsg = async(req,res,next)=>{
         res.status(201).json(saveToDb);
     }
     catch(err){
+        console.log(err)
         return res.status(403).json({ message: "Post Message: unothorized!", success: false });
     }   
 }
@@ -93,7 +109,7 @@ exports.getAllPrivateMsgs = async(req,res,next)=>{
     try{
         const {receiverId,senderId}=req.params;
         const latestMessages = await privateMessage.findAll({
-            attributes: ['senderId', 'senderName', 'receiverId', 'receiverName', 'message'],
+            attributes: ['senderId', 'senderName', 'receiverId', 'receiverName', 'message','multimedia'],
             where: {
               [Op.or]: [
                 { senderId: senderId, receiverId: receiverId },
@@ -114,20 +130,32 @@ exports.getAllPrivateMsgs = async(req,res,next)=>{
 
 exports.getNewPrivateMsgs = async(req,res,next)=>{
     try{
-        const {receiverId,senderId}=req.params;
+      console.log("yes get backend working")
+      const {receiverId,senderId}=req.params;
         const lastMessage = await privateMessage.findOne({
+            where: {
+              [Op.or]: [
+                {
+                  senderId: senderId,
+                  receiverId: receiverId,
+                },
+                {
+                  senderId: receiverId,
+                  receiverId: senderId,
+                },
+              ],
+            },
             order: [['createdAt', 'DESC']], // Assuming your table has a 'createdAt' column
           });
-
-        if (lastMessage){
-            res.status(201).json({'lastMessage':lastMessage})
+          console.log(lastMessage,"lastMessage90")
+          if (lastMessage) {
+                res.status(201).json({ 'lastMessage': lastMessage });
+          } else {
+                console.log('No Message Found');
+                res.status(404).json({ message: 'No message found', success: false });
+          }
+        } catch (err) {
+          console.error(err);
+          res.status(500).json({ message: 'Internal server error', success: false });
         }
-        else{
-            console.log('No Message Found')
-        }
-        
-    }   
-    catch(err){
-        res.status(403).json({ message: "No message found", success: false });
-    }
-}
+      };

@@ -148,19 +148,37 @@ socket.on('remove-success',data=>{
 //post message:
 document.getElementById('send').onclick = async function (e) {
     e.preventDefault();
-    try {
-        const messageDetails = {
-            
-            message: document.getElementById('textArea').value,
-            userId: Number(userId),
-            groupId: Number(groupId)  
+    message= document.getElementById('textArea').value
+    let fileInput = document.getElementById('fileInput')
+    let fileInputValue = document.getElementById("fileInput").value;
+    userId= Number(userId),
+    groupId= Number(groupId) 
 
-        }
-        
-        const postResp = await axios.post('/user/message', messageDetails, { headers: { "Authorization": token } });
-        // console.log("****", postResp.data);
-            
+    if (!(fileInputValue) &&!(message)){
         document.getElementById('textArea').value="";
+        return
+    }else if ((!fileInputValue)&&(message.trim()===""))
+    {   document.getElementById('textArea').value="";
+        return
+    }
+
+    try {
+        let formData = new FormData()
+        formData.append('message', message);
+        formData.append('file', fileInput.files[0]);
+        formData.append('userId', userId);
+        formData.append('groupId', groupId);
+        
+        document.getElementById('textArea').value="";
+        document.getElementById('fileInput').value="";
+        
+        //console.log('message', message,'file', fileInput.files[0],'userId', userId,'groupId', groupId)
+        const postResp = await axios.post('/user/message', formData, { 
+            headers: { 
+                'Content-Type': 'multipart/form-data',
+                "Authorization": token 
+            } });
+            
 
         //socket function:==>
         socket.emit('send-message',(groupId));
@@ -170,8 +188,8 @@ document.getElementById('send').onclick = async function (e) {
 
     }
     catch (err) {
-        // console.log(err)
-        alert(err.response.data.message);
+         console.log(err)
+        //alert(err.response.data.message);
     }
 
 }
@@ -214,15 +232,78 @@ function display(data){
         let parentNode=document.querySelector('#box');
         // let parentNode2=document.querySelector('.right');
         // console.log('--0000--->',data)
-
+        let senderName=data.senderName
+        let message = data.message
+        let multimedia= data.multimedia
         if(data.userId==userId){
-            let childNode2=`<div class="right message" id=${data.id}><span class="fw-bold">${data.senderName}:</span> <span class="fst-italic">${data.message}</span></div>`;
-            parentNode.innerHTML+=childNode2;
-            // <p>${data.createdAt.slice(11,19)}</p>
+            //--commented--
+            //let childNode2=`<div class="right message" id=${data.id}><span class="fw-bold">${data.senderName}:</span> <span class="fst-italic">${data.message}</span></div>`;
+            //parentNode.innerHTML+=childNode2;
+            //--till here--
+            if (message) {
+                const messageContainer = document.createElement('div');
+                messageContainer.classList.add('right', 'message');
+                messageContainer.id = userId;
+    
+                const messageText = document.createElement('span');
+                messageText.classList.add('fw-bold', 'fst-italic');
+                messageText.textContent = `${senderName}: ${message}`;
+                messageContainer.appendChild(messageText);
+    
+                // Append the message container to the chat container
+                parentNode.appendChild(messageContainer);
+            }
+    
+            // Multimedia container
+            if (multimedia) {
+                const multimediaContainer = document.createElement('div');
+                multimediaContainer.classList.add('right', 'multimedia');
+                multimediaContainer.id = userId;
+    
+                const multimediaElement = document.createElement('img');
+                multimediaElement.src = multimedia;
+                multimediaElement.alt = 'Multimedia';
+                multimediaElement.style.width = '400px'//'100px'; // Adjust the width as needed
+                multimediaElement.style.height = '400px'//'auto'; //
+                multimediaElement.style.border = '6px solid #800080'
+                multimediaContainer.appendChild(multimediaElement);
+    
+                // Append the multimedia container to the chat container
+                parentNode.appendChild(multimediaContainer);
+            }
         }else{
-            let childNode1=`<div class="left message" id=${data.id}><span class="fw-bold">${data.senderName}:</span> <span class="fst-italic">${data.message}</span></div>`;
-
-            parentNode.innerHTML+=childNode1;
+            // Message container
+            if (message) {
+                const messageContainer = document.createElement('div');
+                messageContainer.classList.add('left', 'message');
+                messageContainer.id = userId;
+    
+                const messageText = document.createElement('span');
+                messageText.classList.add('fw-bold', 'fst-italic');
+                messageText.textContent = `${senderName}: ${message}`;
+                messageContainer.appendChild(messageText);
+    
+                // Append the message container to the chat container
+                parentNode.appendChild(messageContainer);
+            }
+    
+            // Multimedia container
+            if (multimedia) {
+                const multimediaContainer = document.createElement('div');
+                multimediaContainer.classList.add('left', 'multimedia');
+                multimediaContainer.id = userId;
+    
+                const multimediaElement = document.createElement('img');
+                multimediaElement.src = multimedia;
+                multimediaElement.alt = 'Multimedia';
+                multimediaElement.style.width = '400px'; // Adjust the width as needed
+                multimediaElement.style.height = '400px'; //
+                multimediaElement.style.border = '6px solid #800080'
+                multimediaContainer.appendChild(multimediaElement);
+    
+                // Append the multimedia container to the chat container
+                parentNode.appendChild(multimediaContainer);
+            }
 
         }
         
